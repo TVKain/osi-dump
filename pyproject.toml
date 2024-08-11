@@ -7,7 +7,7 @@ authors = [{ name = "TVKain" }]
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 classifiers = ["License :: OSI Approved :: Apache Software License"]
-dependencies = ["typer", "openstacksdk", "pydantic", "pandas"]
+dependencies = ["typer", "openstacksdk", "pydantic", "pandas", "openpyxl"]
 
 
 [project.scripts]

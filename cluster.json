@@ -1,0 +1,10 @@
+[
+    {
+        "auth_url": "http://192.168.0.247:5000",
+        "project_name": "admin",
+        "username": "admin",
+        "password": "0LYIp5LXT5e5GNok4Rw1WsWG9QXG3H0ilQR6ob3H",
+        "user_domain_name": "default",
+        "project_domain_name" :"default"
+    }
+]
