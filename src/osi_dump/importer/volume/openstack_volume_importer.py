@@ -29,7 +29,9 @@ class OpenStackVolumeImporter(VolumeImporter):
         logger.info(f"Importing volumes for {self.connection.auth['auth_url']}")
 
         try:
-            osvolumes: list[OSVolume] = list(self.connection.list_volumes())
+            osvolumes: list[OSVolume] = list(
+                self.connection.block_storage.volumes(details=True, all_projects=True)
+            )
         except Exception as e:
             raise Exception(
                 f"Can not fetch volumes for {self.connection.auth['auth_url']}"
