@@ -51,7 +51,8 @@ class OpenStackInstanceImporter(InstanceImporter):
 
     def _get_instance_info(self, server: Server) -> Instance:
 
-        # Lấy thông tin project
+        project_name = None
+        project_id = None
         try:
             project = self.connection.identity.get_project(server.project_id)
             project_name = project.name
@@ -60,10 +61,8 @@ class OpenStackInstanceImporter(InstanceImporter):
             logger.warn(
                 f"Unable to obtain project name for instance: {server.name}: {e}"
             )
-            project_name = None
-            project_id = None
 
-        # Lấy thông tin domain
+        domain_name = None
         try:
             domain = self.connection.identity.get_domain(project.domain_id)
             domain_name = domain.name
@@ -71,7 +70,6 @@ class OpenStackInstanceImporter(InstanceImporter):
             logger.warning(
                 f"Unable to obtain domain name for instance {server.name}: {e}"
             )
-            domain_name = None
 
         # Lấy thông tin IPv4 private
         private_v4_ips = []
