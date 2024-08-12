@@ -17,5 +17,7 @@ class Volume(BaseModel):
     type: str
     size: int
 
+    snapshots: Optional[list[str]]
+
     updated_at: str
     created_at: str

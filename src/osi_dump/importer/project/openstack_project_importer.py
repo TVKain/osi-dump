@@ -49,12 +49,39 @@ class OpenStackProjectImporter(ProjectImporter):
         return projects
 
     def _get_project_info(self, project: OSProject) -> Project:
+
+        try:
+            compute_quotas = self.connection.compute.get_quota_set(
+                project.id, usage=True
+            )
+        except Exception as e:
+            logger.warning(f"Get compute quotas failed for {project.id} error: {e}")
+
+        try:
+            storage_quotas = self.connection.block_storage.get_quota_set(
+                project.id, usage=True
+            )
+        except Exception as e:
+            logger.warning(f"Get storage quotas failed for {project.id} error: {e}")
+
         project_ret = Project(
             project_id=project.id,
             project_name=project.name,
             domain_id=project.domain_id,
             enabled=project.is_enabled,
             parent_id=project.parent_id,
+            usage_instance=compute_quotas.usage["instances"],
+            quota_instance=compute_quotas.instances,
+            usage_ram=compute_quotas.usage["ram"],
+            quota_ram=compute_quotas.ram,
+            usage_vcpu=compute_quotas.usage["cores"],
+            quota_vcpu=compute_quotas.cores,
+            usage_volume=storage_quotas.volumes,
+            quota_volume=storage_quotas.usage["volumes"],
+            usage_snapshot=storage_quotas.snapshots,
+            quota_snapshot=storage_quotas.usage["snapshots"],
+            usage_storage=storage_quotas.gigabytes,
+            quota_storage=storage_quotas.usage["gigabytes"],
         )
 
         return project_ret

@@ -52,6 +52,19 @@ class OpenStackVolumeImporter(VolumeImporter):
 
     def _get_volume_info(self, volume: OSVolume) -> Volume:
 
+        snapshots = []
+        try:
+            snapshots = list(
+                self.connection.block_storage.snapshots(
+                    details=False, all_projects=True, volume_id=volume.id
+                )
+            )
+
+            snapshots = [snapshot["id"] for snapshot in snapshots]
+
+        except Exception as e:
+            logger.warning(f"Fetching snapshots failed for {volume.id} error: {e}")
+
         ret_volume = Volume(
             volume_id=volume.id,
             project_id=volume.project_id,
@@ -59,6 +72,7 @@ class OpenStackVolumeImporter(VolumeImporter):
             attachments=[att["server_id"] for att in volume.attachments],
             type=volume.volume_type,
             size=volume.size,
+            snapshots=snapshots,
             updated_at=volume.updated_at,
             created_at=volume.created_at,
         )

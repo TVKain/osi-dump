@@ -7,6 +7,12 @@ class Hypervisor(BaseModel):
     name: str
     state: str
     status: str
-    local_disk_size: int
+
+    vcpus: int
+    vcpus_usage: int
+
     memory_size: int
-    vpus: int
+    memory_usage: int
+
+    local_disk_usage: int
+    local_disk_size: int

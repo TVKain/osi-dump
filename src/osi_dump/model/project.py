@@ -11,3 +11,21 @@ class Project(BaseModel):
     domain_id: Optional[str]
     enabled: bool
     parent_id: Optional[str]
+
+    usage_instance: Optional[int]
+    quota_instance: Optional[int]
+
+    usage_vcpu: Optional[int]
+    quota_vcpu: Optional[int]
+
+    usage_ram: Optional[int]
+    quota_ram: Optional[int]
+
+    usage_volume: Optional[int]
+    quota_volume: Optional[int]
+
+    usage_snapshot: Optional[int]
+    quota_snapshot: Optional[int]
+
+    usage_storage: Optional[int]
+    quota_storage: Optional[int]

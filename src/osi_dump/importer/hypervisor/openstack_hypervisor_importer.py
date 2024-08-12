@@ -11,6 +11,8 @@ from openstack.placement.v1.resource_provider_inventory import ResourceProviderI
 from osi_dump.importer.hypervisor.hypervisor_importer import HypervisorImporter
 from osi_dump.model.hypervisor import Hypervisor
 
+from osi_dump.api.placement import get_usage
+
 logger = logging.getLogger(__name__)
 
 
@@ -61,6 +63,8 @@ class OpenStackHypervisorImporter(HypervisorImporter):
             )
         )
 
+        usage_data = get_usage(self.connection, resource_provider_id=hypervisor.id)
+
         vcpu = rpi[0]
         memory = rpi[1]
         disk = rpi[2]
@@ -73,7 +77,10 @@ class OpenStackHypervisorImporter(HypervisorImporter):
             status=hypervisor.status,
             local_disk_size=disk["max_unit"],
             memory_size=memory["max_unit"] + memory["reserved"],
-            vpus=vcpu["max_unit"],
+            vcpus=vcpu["max_unit"],
+            vcpus_usage=usage_data["VCPU"],
+            memory_usage=usage_data["MEMORY_MB"],
+            local_disk_usage=usage_data["DISK_GB"],
         )
 
         return ret_hypervisor
