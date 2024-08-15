@@ -16,3 +16,5 @@ class Hypervisor(BaseModel):
 
     local_disk_usage: int
     local_disk_size: int
+
+    vm_count: int

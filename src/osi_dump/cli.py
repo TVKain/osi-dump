@@ -8,9 +8,16 @@ import typer
 
 from typing_extensions import Annotated
 
+from osi_dump.batch_handler.load_balancer_batch_handler import LoadBalancerBatchHandler
+from osi_dump.batch_handler.role_assignment_batch_handler import (
+    RoleAssignmentBatchHandler,
+)
+
 app = typer.Typer()
 
 
+from osi_dump.batch_handler.flavor_batch_handler import FlavorBatchHandler
+from osi_dump.batch_handler.image_batch_handler import ImageBatchHandler
 from osi_dump.batch_handler.volume_batch_handler import VolumeBatchHandler
 from osi_dump.os_connection.get_connections import get_connections
 
@@ -76,6 +83,46 @@ def _hypervisor(connections, output_path: str):
     hypervisor_batch_handler.process()
 
 
+def _image(connections, output_path: str):
+    image_batch_handler = ImageBatchHandler()
+
+    image_batch_handler.add_importer_exporter_from_openstack_connections(
+        connections, output_file=output_path
+    )
+
+    image_batch_handler.process()
+
+
+def _flavor(connections, output_path: str):
+    flavor_batch_handler = FlavorBatchHandler()
+
+    flavor_batch_handler.add_importer_exporter_from_openstack_connections(
+        connections, output_file=output_path
+    )
+
+    flavor_batch_handler.process()
+
+
+def _role_assignment(connections, output_path: str):
+    _role_assignment_batch_handler = RoleAssignmentBatchHandler()
+
+    _role_assignment_batch_handler.add_importer_exporter_from_openstack_connections(
+        connections, output_file=output_path
+    )
+
+    _role_assignment_batch_handler.process()
+
+
+def _load_balancer(connections, output_path: str):
+    _load_balancer_batch_handler = LoadBalancerBatchHandler()
+
+    _load_balancer_batch_handler.add_importer_exporter_from_openstack_connections(
+        connections, output_file=output_path
+    )
+
+    _load_balancer_batch_handler.process()
+
+
 def inner_main(file_path: str, output_path: str):
 
     logger = logging.getLogger(__name__)
@@ -92,6 +139,13 @@ def inner_main(file_path: str, output_path: str):
 
     _project(connections=connections, output_path=output_path)
 
+    _image(connections=connections, output_path=output_path)
+
+    _flavor(connections=connections, output_path=output_path)
+
+    _role_assignment(connections=connections, output_path=output_path)
+
+    _load_balancer(connections=connections, output_path=output_path)
     util.excel_autosize_column(output_path)
 
     util.excel_sort_sheet(output_path)
@@ -140,6 +194,9 @@ Path of the output file, will override if file already exists
     logging.basicConfig(
         level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
     )
+
+    # Suppress pool limit warning will investigate later
+    logging.getLogger("urllib3").propagate = False
 
     logger = logging.getLogger(__name__)
 

@@ -33,7 +33,9 @@ class OpenStackHypervisorImporter(HypervisorImporter):
         logger.info(f"Importing hypervisors for {self.connection.auth['auth_url']}")
 
         try:
-            oshypervisors: list[OSHypervisor] = list(self.connection.list_hypervisors())
+            oshypervisors: list[OSHypervisor] = list(
+                self.connection.compute.hypervisors(details=True)
+            )
         except Exception as e:
             raise Exception(
                 f"Can not fetch hypervisor for {self.connection.auth['auth_url']}"
@@ -63,6 +65,12 @@ class OpenStackHypervisorImporter(HypervisorImporter):
             )
         )
 
+        servers = list(
+            self.connection.compute.servers(
+                details=False, all_project=True, hypervisor=hypervisor.id
+            )
+        )
+
         usage_data = get_usage(self.connection, resource_provider_id=hypervisor.id)
 
         vcpu = rpi[0]
@@ -81,6 +89,7 @@ class OpenStackHypervisorImporter(HypervisorImporter):
             vcpus_usage=usage_data["VCPU"],
             memory_usage=usage_data["MEMORY_MB"],
             local_disk_usage=usage_data["DISK_GB"],
+            vm_count=len(servers),
         )
 
         return ret_hypervisor

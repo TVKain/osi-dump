@@ -76,12 +76,12 @@ class OpenStackProjectImporter(ProjectImporter):
             quota_ram=compute_quotas.ram,
             usage_vcpu=compute_quotas.usage["cores"],
             quota_vcpu=compute_quotas.cores,
-            usage_volume=storage_quotas.volumes,
-            quota_volume=storage_quotas.usage["volumes"],
-            usage_snapshot=storage_quotas.snapshots,
-            quota_snapshot=storage_quotas.usage["snapshots"],
-            usage_storage=storage_quotas.gigabytes,
-            quota_storage=storage_quotas.usage["gigabytes"],
+            usage_volume=storage_quotas.usage["volumes"],
+            quota_volume=storage_quotas.volumes,
+            usage_snapshot=storage_quotas.usage["snapshots"],
+            quota_snapshot=storage_quotas.snapshots,
+            usage_storage=storage_quotas.usage["gigabytes"],
+            quota_storage=storage_quotas.gigabytes,
         )
 
         return project_ret
