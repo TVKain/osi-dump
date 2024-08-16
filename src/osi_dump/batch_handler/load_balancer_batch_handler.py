@@ -34,9 +34,7 @@ class LoadBalancerBatchHandler:
         for connection in connections:
             importer = OpenStackLoadBalancerImporter(connection)
 
-            sheet_name = (
-                f"{util.extract_hostname(connection.auth['auth_url'])}-load_balancer"
-            )
+            sheet_name = f"{util.extract_hostname(connection.auth['auth_url'])}-lb"
             exporter = ExcelLoadBalancerExporter(
                 sheet_name=sheet_name, output_file=output_file
             )

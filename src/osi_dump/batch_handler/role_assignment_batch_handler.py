@@ -35,7 +35,7 @@ class RoleAssignmentBatchHandler:
             importer = OpenStackRoleAssignmentImporter(connection)
 
             sheet_name = (
-                f"{util.extract_hostname(connection.auth['auth_url'])}-role_assignment"
+                f"{util.extract_hostname(connection.auth['auth_url'])}-role_ass"
             )
             exporter = ExcelRoleAssignmentExporter(
                 sheet_name=sheet_name, output_file=output_file

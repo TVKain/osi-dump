@@ -67,7 +67,7 @@ class OpenStackHypervisorImporter(HypervisorImporter):
 
         servers = list(
             self.connection.compute.servers(
-                details=False, all_project=True, hypervisor=hypervisor.id
+                details=True, all_project=True, hypervisor_hostname=hypervisor.name
             )
         )
 

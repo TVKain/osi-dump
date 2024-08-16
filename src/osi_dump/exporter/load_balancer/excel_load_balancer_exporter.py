@@ -24,6 +24,8 @@ class ExcelLoadBalancerExporter(LoadBalancerExporter):
             [load_balancer.model_dump() for load_balancer in load_balancers]
         )
 
+        df = util.expand_list_column(df, "amphoraes")
+
         logger.info(f"Exporting load_balancers for {self.sheet_name}")
         try:
             util.export_data_excel(self.output_file, sheet_name=self.sheet_name, df=df)

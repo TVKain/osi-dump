@@ -11,6 +11,8 @@ from osi_dump.importer.load_balancer.load_balancer_importer import (
 )
 from osi_dump.model.load_balancer import LoadBalancer
 
+import osi_dump.api.octavia as octavia_api
+
 logger = logging.getLogger(__name__)
 
 
@@ -31,12 +33,12 @@ class OpenStackLoadBalancerImporter(LoadBalancerImporter):
         logger.info(f"Importing load_balancers for {self.connection.auth['auth_url']}")
 
         try:
-            osload_balancers: list[OSLoadBalancer] = list(
-                self.connection.network.load_balancers()
+            osload_balancers: list[OSLoadBalancer] = octavia_api.get_load_balancers(
+                connection=self.connection
             )
         except Exception as e:
             raise Exception(
-                f"Can not fetch load_balancers for {self.connection.auth['auth_url']}"
+                f"Can not fetch load_balancers for {self.connection.auth['auth_url']} {e}"
             ) from e
 
         load_balancers: list[LoadBalancer] = []
@@ -55,11 +57,16 @@ class OpenStackLoadBalancerImporter(LoadBalancerImporter):
 
     def _get_load_balancer_info(self, load_balancer: OSLoadBalancer) -> LoadBalancer:
 
+        amphoraes = octavia_api.get_amphoraes(
+            connection=self.connection, load_balancer_id=load_balancer["id"]
+        )
+
         load_balancer_ret = LoadBalancer(
-            id=load_balancer.id,
-            load_balancer_name=load_balancer.name,
-            status=load_balancer.operating_status,
-            project_id=load_balancer.project_id,
+            id=load_balancer["id"],
+            load_balancer_name=load_balancer["name"],
+            status=load_balancer["operating_status"],
+            project_id=load_balancer["project_id"],
+            amphoraes=amphoraes,
         )
 
         return load_balancer_ret

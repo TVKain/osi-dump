@@ -12,6 +12,6 @@ class LoadBalancer(BaseModel):
 
     status: str
 
-    # amphora_id: Optional[str]
+    amphoraes: list[str]
 
     project_id: Optional[str]

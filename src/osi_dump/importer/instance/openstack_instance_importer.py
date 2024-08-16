@@ -96,6 +96,7 @@ class OpenStackInstanceImporter(InstanceImporter):
             private_v4_ips=private_v4_ips,
             floating_ip=floating_ip,
             status=server.status,
+            hypervisor=server.hypervisor_hostname,
             ram=server.flavor["ram"],
             vcpus=server.flavor["vcpus"],
             created_at=server.created_at,

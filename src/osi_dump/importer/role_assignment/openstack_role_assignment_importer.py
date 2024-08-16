@@ -58,6 +58,19 @@ class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
         self, role_assignment: OSRoleAssignment
     ) -> RoleAssignment:
 
+        user_id = None
+        role_id = None
+
+        try:
+            user_id = role_assignment.user["id"]
+        except Exception as e:
+            logger.warning(f"Can not get user id: {e}")
+
+        try:
+            role_id = role_assignment.role["id"]
+        except Exception as e:
+            logger.warning(f"Can not get role id: {e}")
+
         user_name = None
         role_name = None
 
@@ -65,17 +78,21 @@ class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
             role_name = self.connection.identity.get_role(
                 role_assignment.role["id"]
             ).name
+
+        except Exception as e:
+            logger.warning(f"Can not get role name: {e}")
+
+        try:
             user_name = self.connection.identity.get_user(
                 role_assignment.user["id"]
             ).name
-
         except Exception as e:
-            logger.warning("Can not get role name or user name")
+            logger.warning(f"Can not get user name: {e}")
 
         role_assignment_ret = RoleAssignment(
-            user_id=role_assignment.user["id"],
+            user_id=user_id,
             user_name=user_name,
-            role_id=role_assignment.role["id"],
+            role_id=role_id,
             role_name=role_name,
             scope=role_assignment.scope,
         )

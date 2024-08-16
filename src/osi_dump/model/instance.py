@@ -16,5 +16,6 @@ class Instance(BaseModel):
     status: str
     ram: int
     vcpus: int
+    hypervisor: Optional[str]
     created_at: str
     updated_at: str
