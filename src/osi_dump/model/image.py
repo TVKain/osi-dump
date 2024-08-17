@@ -14,6 +14,7 @@ class Image(BaseModel):
     image_name: Optional[str]
     owner: str
 
+    os_distro: Optional[str]
     properties: Optional[dict]
 
     protected: bool

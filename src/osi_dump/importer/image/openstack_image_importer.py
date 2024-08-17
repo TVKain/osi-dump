@@ -67,6 +67,7 @@ class OpenStackImageImporter(ImageImporter):
             properties=os_image.properties,
             protected=os_image.is_protected,
             status=os_image.status,
+            os_distro=os_image.os_distro,
             size=os_image.size,
             virtual_size=os_image.virtual_size,
             visibility=os_image.visibility,
