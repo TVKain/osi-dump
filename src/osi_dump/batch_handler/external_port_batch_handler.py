@@ -30,9 +30,7 @@ class ExternalPortBatchHandler:
         for connection in connections:
             importer = OpenStackExternalPortImporter(connection)
 
-            sheet_name = (
-                f"{util.extract_hostname(connection.auth['auth_url'])}-external_port"
-            )
+            sheet_name = f"{util.extract_hostname(connection.auth['auth_url'])}-ex-port"
             exporter = ExcelExternalPortExporter(
                 sheet_name=sheet_name, output_file=output_file
             )
