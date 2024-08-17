@@ -32,11 +32,10 @@ class OpenStackExternalPortImporter(ExternalPortImporter):
         for network in networks:
             ex_ports = list(self.connection.network.ports(network_id=network.id))
 
-            external_ports.append(ex_ports)
+            for ex_port in ex_ports:
+                external_ports.append(ex_port)
 
         # Get all port on those networks
-
-        external_ports = list(np.array(external_ports).flatten())
 
         return external_ports
 
