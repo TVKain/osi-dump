@@ -9,6 +9,8 @@ import numpy as np
 from openstack.connection import Connection
 from openstack.network.v2.port import Port as OSPort
 from openstack.network.v2.subnet import Subnet as OSSubnet
+from openstack.network.v2.floating_ip import FloatingIP as OSFloatingIP
+from openstack.network.v2.router import Router as OSRouter
 
 from osi_dump.importer.external_port.external_port_importer import ExternalPortImporter
 from osi_dump.model.external_port import ExternalPort
@@ -108,9 +110,20 @@ class OpenStackExternalPortImporter(ExternalPortImporter):
         except Exception as e:
             logger.warning(f"No subnet cidr found for port {external_port.id}")
 
+        mapped_device_project = ["network:floatingip", "network:router_gateway"]
+
+        project_id = (
+            external_port.project_id
+            if external_port.device_owner not in mapped_device_project
+            else self._map_project_id(
+                device_owner=external_port.device_owner,
+                device_id=external_port.device_id,
+            )
+        )
+
         external_port_ret = ExternalPort(
             port_id=external_port.id,
-            project_id=external_port.project_id,
+            project_id=project_id,
             network_id=external_port.network_id,
             subnet_id=subnet_id,
             subnet_cidr=subnet_cidr,
@@ -122,3 +135,22 @@ class OpenStackExternalPortImporter(ExternalPortImporter):
         )
 
         return external_port_ret
+
+    def _map_project_id(self, device_owner: str, device_id: str) -> str:
+
+        if device_owner == "network:router_gateway":
+            return self._map_project_id_router(device_id=device_id)
+        elif device_owner == "network:floatingip":
+            return self._map_project_id_floating(device_id=device_id)
+
+        return ""
+
+    def _map_project_id_router(self, device_id: str) -> str:
+        router: OSRouter = self.connection.get_router(name_or_id=device_id)
+
+        return router.project_id
+
+    def _map_project_id_floating(self, device_id: str) -> str:
+        floating_ip: OSFloatingIP = self.connection.get_floating_ip(id=device_id)
+
+        return floating_ip.project_id
