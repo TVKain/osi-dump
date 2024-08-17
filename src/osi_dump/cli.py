@@ -8,6 +8,7 @@ import typer
 
 from typing_extensions import Annotated
 
+from osi_dump.batch_handler.external_port_batch_handler import ExternalPortBatchHandler
 from osi_dump.batch_handler.load_balancer_batch_handler import LoadBalancerBatchHandler
 from osi_dump.batch_handler.role_assignment_batch_handler import (
     RoleAssignmentBatchHandler,
@@ -28,6 +29,11 @@ from osi_dump.batch_handler import (
     ProjectBatchHandler,
     HypervisorBatchHandler,
     FloatingIPBatchHandler,
+)
+
+
+from osi_dump.importer.external_port.openstack_external_port_importer import (
+    OpenStackExternalPortImporter,
 )
 
 
@@ -134,6 +140,16 @@ def _router(connections, output_path: str):
     _router_batch_handler.process()
 
 
+def _external_port(connections, output_path: str):
+    _external_batch_handler = ExternalPortBatchHandler()
+
+    _external_batch_handler.add_importer_exporter_from_openstack_connections(
+        connections, output_file=output_path
+    )
+
+    _external_batch_handler.process()
+
+
 def inner_main(file_path: str, output_path: str):
 
     logger = logging.getLogger(__name__)
@@ -159,6 +175,8 @@ def inner_main(file_path: str, output_path: str):
     _load_balancer(connections=connections, output_path=output_path)
 
     _router(connections=connections, output_path=output_path)
+
+    _external_port(connections=connections, output_path=output_path)
 
     util.excel_autosize_column(output_path)
 

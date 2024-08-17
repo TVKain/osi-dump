@@ -64,8 +64,9 @@ class OpenStackLoadBalancerImporter(LoadBalancerImporter):
         load_balancer_ret = LoadBalancer(
             id=load_balancer["id"],
             load_balancer_name=load_balancer["name"],
-            status=load_balancer["operating_status"],
+            operating_status=load_balancer["operating_status"],
             project_id=load_balancer["project_id"],
+            provisioning_status=load_balancer["provisioning_status"],
             amphoraes=amphoraes,
         )
 

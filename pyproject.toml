@@ -1,13 +1,20 @@
 [project]
 name = "osi-dump"
-version = "0.1.2.1"
-description = "OpenStack instances information dump tool"
+version = "0.1.2.3"
+description = "OpenStack information dump tool"
 readme = "README.md"
 authors = [{ name = "TVKain" }]
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 classifiers = ["License :: OSI Approved :: Apache Software License"]
-dependencies = ["typer", "openstacksdk", "pydantic", "pandas", "openpyxl"]
+dependencies = [
+    "typer",
+    "openstacksdk",
+    "pydantic",
+    "pandas",
+    "openpyxl",
+    "numpy",
+]
 
 
 [project.scripts]

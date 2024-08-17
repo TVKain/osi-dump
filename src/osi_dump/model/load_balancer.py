@@ -10,8 +10,10 @@ class LoadBalancer(BaseModel):
 
     load_balancer_name: Optional[str]
 
-    status: str
+    provisioning_status: Optional[str]
 
-    amphoraes: list[str]
+    operating_status: Optional[str]
+
+    amphoraes: list[dict]
 
     project_id: Optional[str]

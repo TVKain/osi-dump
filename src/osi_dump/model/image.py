@@ -18,7 +18,7 @@ class Image(BaseModel):
 
     protected: bool
     status: str
-    size: int
+    size: Optional[int]
     virtual_size: Optional[int]
     visibility: str
 
