@@ -22,7 +22,6 @@ class OpenStackExternalPortImporter(ExternalPortImporter):
 
     def _get_external_ports(self) -> list[OSPort]:
 
-        self.connection.list_networks()
         # Get all external networks
         networks = self.connection.network.networks(
             is_router_external=True,
@@ -32,9 +31,6 @@ class OpenStackExternalPortImporter(ExternalPortImporter):
 
         for network in networks:
             ex_ports = list(self.connection.network.ports(network_id=network.id))
-
-            for ex_port in ex_ports:
-                ex_port["segmentation_id"] = network.provider_segmentation_id
 
             external_ports.append(ex_ports)
 
@@ -61,7 +57,7 @@ class OpenStackExternalPortImporter(ExternalPortImporter):
             os_ports: list[OSPort] = self._get_external_ports()
         except Exception as e:
             raise Exception(
-                f"Can not fetch external_ports for {self.connection.auth['auth_url']}"
+                f"Can not fetch external_ports for {self.connection.auth['auth_url']} {e}"
             ) from e
 
         external_ports: list[ExternalPort] = []
