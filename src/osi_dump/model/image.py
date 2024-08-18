@@ -12,7 +12,7 @@ class Image(BaseModel):
     min_disk: int
     min_ram: int
     image_name: Optional[str]
-    owner: str
+    owner: Optional[str]
 
     os_distro: Optional[str]
     properties: Optional[dict]
