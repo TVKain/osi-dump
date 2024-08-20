@@ -15,6 +15,8 @@ from openstack.network.v2.router import Router as OSRouter
 from osi_dump.importer.external_port.external_port_importer import ExternalPortImporter
 from osi_dump.model.external_port import ExternalPort
 
+import osi_dump.api.neutron as osi_neutron
+
 logger = logging.getLogger(__name__)
 
 
@@ -146,11 +148,15 @@ class OpenStackExternalPortImporter(ExternalPortImporter):
         return ""
 
     def _map_project_id_router(self, device_id: str) -> str:
-        router: OSRouter = self.connection.get_router(name_or_id=device_id)
+        project_id = osi_neutron.get_router_project(
+            self.connection, router_id=device_id
+        )
 
-        return router.project_id
+        return project_id
 
     def _map_project_id_floating(self, device_id: str) -> str:
-        floating_ip: OSFloatingIP = self.connection.get_floating_ip(id=device_id)
+        project_id = osi_neutron.get_floating_ip_project(
+            self.connection, floating_ip_id=device_id
+        )
 
-        return floating_ip.project_id
+        return project_id

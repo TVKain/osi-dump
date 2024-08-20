@@ -5,6 +5,8 @@ import concurrent
 from openstack.connection import Connection
 from openstack.compute.v2.server import Server
 
+from openstack.compute.v2.flavor import Flavor as OSFlavor
+
 from osi_dump.importer.instance.instance_importer import InstanceImporter
 from osi_dump.model.instance import Instance
 
@@ -87,6 +89,28 @@ class OpenStackInstanceImporter(InstanceImporter):
                 f"Unable to obtain IP address information for instance {server.name}: {e}"
             )
 
+        vgpus = None
+        vgpu_type = None
+
+        vgpu_metadata_property = "pci_passthrough:alias"
+
+        try:
+            flavor: OSFlavor = self.connection.get_flavor(
+                name_or_id=server.flavor["id"]
+            )
+
+            vgpu_prop: str = flavor.extra_specs[vgpu_metadata_property]
+
+            vgpu_props = vgpu_prop.split(":")
+
+            vgpu_type = vgpu_props[0]
+            vgpus = int(vgpu_props[1])
+
+        except Exception as e:
+            logger.warning(
+                f"Unable to obtain GPU information for instance {server.name}: {e}"
+            )
+
         instance = Instance(
             instance_id=server.id,
             instance_name=server.name,
@@ -101,6 +125,8 @@ class OpenStackInstanceImporter(InstanceImporter):
             vcpus=server.flavor["vcpus"],
             created_at=server.created_at,
             updated_at=server.updated_at,
+            vgpus=vgpus,
+            vgpu_type=vgpu_type,
         )
 
         return instance
