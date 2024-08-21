@@ -14,7 +14,9 @@ def get_endpoint(connection: Connection, service_type: str, interface: str) -> s
     port = parsed_endpoint.port
 
     ret = urllib.parse.urlunparse(
-        parsed_endpoint._replace(netloc=f"{new_hostname}:{port}")
+        parsed_endpoint._replace(netloc=f"{new_hostname}:{port}")._replace(
+            scheme="https"
+        )
     )
 
     return ret
