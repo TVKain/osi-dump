@@ -107,9 +107,7 @@ class OpenStackInstanceImporter(InstanceImporter):
             vgpus = int(vgpu_props[1])
 
         except Exception as e:
-            logger.warning(
-                f"Unable to obtain GPU information for instance {server.name}: {e}"
-            )
+            pass
 
         instance = Instance(
             instance_id=server.id,

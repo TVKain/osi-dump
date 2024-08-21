@@ -19,5 +19,5 @@ class Volume(BaseModel):
 
     snapshots: Optional[list[str]]
 
-    updated_at: str
-    created_at: str
+    updated_at: Optional[str]
+    created_at: Optional[str]

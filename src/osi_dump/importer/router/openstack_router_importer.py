@@ -78,6 +78,7 @@ class OpenStackRouterImporter(RouterImporter):
             external_net_id=external_net_id,
             external_net_ip=external_net_ip,
             status=router.status,
+            admin_state=router.is_admin_state_up,
             project_id=router.project_id,
             created_at=router.created_at,
             updated_at=router.updated_at,

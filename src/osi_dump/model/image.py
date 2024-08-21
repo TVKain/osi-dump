@@ -23,5 +23,5 @@ class Image(BaseModel):
     virtual_size: Optional[int]
     visibility: str
 
-    created_at: str
-    updated_at: str
+    created_at: Optional[str]
+    updated_at: Optional[str]

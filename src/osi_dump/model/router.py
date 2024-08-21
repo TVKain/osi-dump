@@ -13,8 +13,10 @@ class Router(BaseModel):
     external_net_id: Optional[str]
     external_net_ip: Optional[str]
 
+    admin_state: Optional[bool]
+
     status: str
     project_id: Optional[str]
 
-    created_at: str
-    updated_at: str
+    created_at: Optional[str]
+    updated_at: Optional[str]
