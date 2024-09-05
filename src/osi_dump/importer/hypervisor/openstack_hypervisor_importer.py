@@ -4,6 +4,7 @@ import concurrent
 
 from openstack.connection import Connection
 from openstack.compute.v2.hypervisor import Hypervisor as OSHypervisor
+from openstack.compute.v2.aggregate import Aggregate as OSAggregate
 
 from openstack.placement.v1._proxy import Proxy as PlacementProxy
 from openstack.placement.v1.resource_provider_inventory import ResourceProviderInventory
@@ -29,6 +30,7 @@ class OpenStackHypervisorImporter(HypervisorImporter):
         Returns:
             list[Hypervisor]: _description_
         """
+        aggregates = list(self.connection.list_aggregates())
 
         try:
             oshypervisors: list[OSHypervisor] = list(
@@ -44,7 +46,7 @@ class OpenStackHypervisorImporter(HypervisorImporter):
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = [
-                executor.submit(self._get_hypervisor_info, hypervisor)
+                executor.submit(self._get_hypervisor_info, hypervisor, aggregates)
                 for hypervisor in oshypervisors
             ]
             for future in concurrent.futures.as_completed(futures):
@@ -54,7 +56,19 @@ class OpenStackHypervisorImporter(HypervisorImporter):
 
         return hypervisors
 
-    def _get_hypervisor_info(self, hypervisor: OSHypervisor) -> Hypervisor:
+    def _get_hypervisor_info(
+        self, hypervisor: OSHypervisor, aggregates: list[OSAggregate]
+    ) -> Hypervisor:
+        aggregate = self._get_aggregate(hypervisor=hypervisor)
+
+        aggregate_id = None
+        aggregate_name = None
+        availability_zone = None
+
+        if aggregate:
+            aggregate_id = aggregate.id
+            aggregate_name = aggregate.name
+            availability_zone = aggregate.availability_zone
 
         placement_proxy: PlacementProxy = self.connection.placement
 
@@ -83,6 +97,18 @@ class OpenStackHypervisorImporter(HypervisorImporter):
             memory_usage=usage_data["MEMORY_MB"],
             local_disk_usage=usage_data["DISK_GB"],
             vm_count=len(hypervisor.servers),
+            aggregate_id=aggregate_id,
+            aggregate_name=aggregate_name,
+            availability_zone=availability_zone,
         )
 
         return ret_hypervisor
+
+    def _get_aggregate(self, hypervisor: OSHypervisor) -> OSAggregate:
+        aggregates = list(self.connection.list_aggregates())
+
+        for aggregate in aggregates:
+            if hypervisor.name in aggregate.hosts:
+                return aggregate
+
+        return None

@@ -61,6 +61,11 @@ class OpenStackLoadBalancerImporter(LoadBalancerImporter):
             connection=self.connection, load_balancer_id=load_balancer["id"]
         )
 
+        for amphorae in amphoraes:
+            flavor = self.connection.get_flavor_by_id(amphorae["compute_flavor"])
+            amphorae["ram"] = flavor.ram
+            amphorae["vcpus"] = flavor.vcpus
+
         load_balancer_ret = LoadBalancer(
             id=load_balancer["id"],
             load_balancer_name=load_balancer["name"],

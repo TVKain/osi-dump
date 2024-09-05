@@ -26,7 +26,7 @@ def get_amphoraes(connection: Connection, load_balancer_id: str) -> list[dict]:
         connection=connection, service_type="load-balancer", interface="public"
     )
 
-    url = f"{octavia_endpoint}/v2/octavia/amphorae?load_balancer_id={load_balancer_id}&fields=status&fields=compute_id"
+    url = f"{octavia_endpoint}/v2/octavia/amphorae?load_balancer_id={load_balancer_id}&fields=status&fields=compute_id&fields=compute_flavor"
 
     response = connection.session.get(url)
 

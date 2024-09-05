@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel, ConfigDict, ValidationError
 
 
@@ -16,5 +17,9 @@ class Hypervisor(BaseModel):
 
     local_disk_usage: int
     local_disk_size: int
+
+    availability_zone: Optional[str]
+    aggregate_name: Optional[str]
+    aggregate_id: Optional[str]
 
     vm_count: int

@@ -123,6 +123,7 @@ class OpenStackInstanceImporter(InstanceImporter):
             vcpus=server.flavor["vcpus"],
             created_at=server.created_at,
             updated_at=server.updated_at,
+            user_id=server.user_id,
             vgpus=vgpus,
             vgpu_type=vgpu_type,
         )

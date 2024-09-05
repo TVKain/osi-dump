@@ -19,5 +19,8 @@ class Instance(BaseModel):
     vgpus: Optional[int]
     vgpu_type: Optional[str]
     hypervisor: Optional[str]
+
+    user_id: Optional[str]
+
     created_at: str
     updated_at: str
