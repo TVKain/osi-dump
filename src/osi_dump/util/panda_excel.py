@@ -18,14 +18,7 @@ def expand_list_column(df, column):
     # Flatten the nested dictionaries into separate columns
     expanded_df = pd.json_normalize(expanded_df.to_dict(orient="records"))
 
-    new_columns = []
-    for i in range(max_len):
-        for key in expanded_df.columns[i::max_len]:
-            new_key = key.split(".")[-1]  # Get the actual key name
-            new_columns.append(f"{column}_{i+1}.{new_key}")
-
-    # Rename the columns to reflect the nested structure
-    expanded_df.columns = new_columns
+    expanded_df = expanded_df.add_prefix(column)
 
     # Drop the original column and join the expanded columns
     df = df.drop(column, axis=1).join(expanded_df)

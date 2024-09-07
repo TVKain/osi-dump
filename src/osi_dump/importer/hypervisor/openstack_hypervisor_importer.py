@@ -59,16 +59,7 @@ class OpenStackHypervisorImporter(HypervisorImporter):
     def _get_hypervisor_info(
         self, hypervisor: OSHypervisor, aggregates: list[OSAggregate]
     ) -> Hypervisor:
-        aggregate = self._get_aggregate(hypervisor=hypervisor)
-
-        aggregate_id = None
-        aggregate_name = None
-        availability_zone = None
-
-        if aggregate:
-            aggregate_id = aggregate.id
-            aggregate_name = aggregate.name
-            availability_zone = aggregate.availability_zone
+        aggregate_list, az = self._get_aggregates(hypervisor=hypervisor)
 
         placement_proxy: PlacementProxy = self.connection.placement
 
@@ -97,18 +88,33 @@ class OpenStackHypervisorImporter(HypervisorImporter):
             memory_usage=usage_data["MEMORY_MB"],
             local_disk_usage=usage_data["DISK_GB"],
             vm_count=len(hypervisor.servers),
-            aggregate_id=aggregate_id,
-            aggregate_name=aggregate_name,
-            availability_zone=availability_zone,
+            aggregates=aggregate_list,
+            availability_zone=az,
         )
 
         return ret_hypervisor
 
-    def _get_aggregate(self, hypervisor: OSHypervisor) -> OSAggregate:
-        aggregates = list(self.connection.list_aggregates())
+    def _get_aggregates(self, hypervisor: OSHypervisor):
+        aggregates_ret = []
+
+        aggregates: OSAggregate = list(self.connection.list_aggregates())
+
+        az = None
 
         for aggregate in aggregates:
             if hypervisor.name in aggregate.hosts:
-                return aggregate
+                aggregates_ret.append(
+                    {
+                        "id": aggregate.id,
+                        "name": aggregate.name,
+                    }
+                )
 
-        return None
+            if aggregate.availability_zone != None:
+                az = aggregate.availability_zone
+
+        aggregates_ret = [
+            dict(sorted(aggregate.items())) for aggregate in aggregates_ret
+        ]
+
+        return aggregates_ret, az

@@ -23,7 +23,7 @@ class ExcelLoadBalancerExporter(LoadBalancerExporter):
         df = pd.json_normalize(
             [load_balancer.model_dump() for load_balancer in load_balancers]
         )
-
+        
         df = util.expand_list_column(df, "amphoraes")
 
         logger.info(f"Exporting load_balancers for {self.sheet_name}")

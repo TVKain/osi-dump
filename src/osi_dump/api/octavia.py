@@ -34,4 +34,6 @@ def get_amphoraes(connection: Connection, load_balancer_id: str) -> list[dict]:
 
     amphoraes = data["amphorae"]
 
+    amphoraes = [dict(sorted(amphorae.items())) for amphorae in amphoraes]
+
     return amphoraes

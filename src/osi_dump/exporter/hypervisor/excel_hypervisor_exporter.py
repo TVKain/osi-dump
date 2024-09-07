@@ -21,6 +21,8 @@ class ExcelHypervisorExporter(HypervisorExporter):
     def export_hypervisors(self, hypervisors: list[Hypervisor]):
         df = pd.DataFrame([hypervisor.model_dump() for hypervisor in hypervisors])
 
+        df = util.expand_list_column(df, "aggregates")
+
         logger.info(f"Exporting hypervisors for {self.sheet_name}")
         try:
             util.export_data_excel(self.output_file, sheet_name=self.sheet_name, df=df)
