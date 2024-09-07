@@ -110,8 +110,8 @@ class OpenStackHypervisorImporter(HypervisorImporter):
                     }
                 )
 
-            if aggregate.availability_zone != None:
-                az = aggregate.availability_zone
+                if aggregate.availability_zone != None:
+                    az = aggregate.availability_zone
 
         aggregates_ret = [
             dict(sorted(aggregate.items())) for aggregate in aggregates_ret
