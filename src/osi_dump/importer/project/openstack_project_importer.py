@@ -64,10 +64,18 @@ class OpenStackProjectImporter(ProjectImporter):
         except Exception as e:
             logger.warning(f"Get storage quotas failed for {project.id} error: {e}")
 
+        domain_name = None
+        try:
+            domain = self.connection.identity.get_domain(project.domain_id)
+            domain_name = domain.name
+        except Exception as e:
+            logger.warning(f"Get domain failed for {project.domain_id} error: {e}")
+
         project_ret = Project(
             project_id=project.id,
             project_name=project.name,
             domain_id=project.domain_id,
+            domain_name=domain_name,
             enabled=project.is_enabled,
             parent_id=project.parent_id,
             usage_instance=compute_quotas.usage["instances"],

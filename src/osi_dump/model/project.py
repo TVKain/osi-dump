@@ -9,6 +9,7 @@ class Project(BaseModel):
     project_id: str
     project_name: Optional[str]
     domain_id: Optional[str]
+    domain_name: Optional[str]
     enabled: bool
     parent_id: Optional[str]
 
