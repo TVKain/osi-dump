@@ -7,13 +7,27 @@ import osi_dump.util.openstack_util as os_util
 
 
 def get_load_balancers(connection: Connection) -> list[LoadBalancer]:
-    octavia_endpoint = os_util.get_endpoint(
+    # octavia_endpoint = os_util.get_endpoint(
+    #     connection=connection, service_type="load-balancer", interface="public"
+    # )
+
+    octavia_endpoints = os_util.get_endpoints(
         connection=connection, service_type="load-balancer", interface="public"
     )
 
-    url = f"{octavia_endpoint}/v2.0/lbaas/loadbalancers"
+    response = None
 
-    response = connection.session.get(url)
+    for endpoint in octavia_endpoints:
+        try:
+            url = f"{endpoint}/v2.0/lbaas/loadbalancers"
+            response = connection.session.get(url)
+            if response.status_code == 200:
+                break
+        except Exception as e:
+            print(e)
+
+    if response is None:
+        return None
 
     data = response.json()
 
@@ -22,13 +36,27 @@ def get_load_balancers(connection: Connection) -> list[LoadBalancer]:
 
 def get_amphoraes(connection: Connection, load_balancer_id: str) -> list[dict]:
 
-    octavia_endpoint = os_util.get_endpoint(
+    # octavia_endpoint = os_util.get_endpoint(
+    #     connection=connection, service_type="load-balancer", interface="public"
+    # )
+
+    octavia_endpoints = os_util.get_endpoints(
         connection=connection, service_type="load-balancer", interface="public"
     )
 
-    url = f"{octavia_endpoint}/v2/octavia/amphorae?load_balancer_id={load_balancer_id}&fields=status&fields=compute_id&fields=compute_flavor"
+    response = None
 
-    response = connection.session.get(url)
+    for endpoint in octavia_endpoints:
+        try:
+            url = f"{endpoint}/v2/octavia/amphorae?load_balancer_id={load_balancer_id}&fields=status&fields=compute_id&fields=compute_flavor"
+            response = connection.session.get(url)
+            if response.status_code == 200:
+                break
+        except Exception as e:
+            print(e)
+
+    if response is None:
+        return None
 
     data = response.json()
 

@@ -10,34 +10,55 @@ logger = logging.getLogger(__name__)
 
 
 def get_floating_ip_project(connection: Connection, floating_ip_id: str):
-    neutron_endpoint = os_util.get_endpoint(
+    # neutron_endpoint = os_util.get_endpoint(
+    #     connection=connection, service_type="network", interface="public"
+    # )
+
+    neutron_endpoints = os_util.get_endpoints(
         connection=connection, service_type="network", interface="public"
     )
 
-    try:
-        url = f"{neutron_endpoint}/v2.0/floatingips/{floating_ip_id}?fields=project_id"
-        response = connection.session.get(url)
+    response = None
 
-    except Exception as e:
-        print(e)
+    for endpoint in neutron_endpoints:
+        try:
+            url = f"{endpoint}/v2.0/floatingips/{floating_ip_id}?fields=project_id"
+            response = connection.session.get(url)
+            if response.status_code == 200:
+                break
+        except Exception as e:
+            print(e)
 
-    data = response.json()
+    if response is None:
+        return None
 
-    return data["floatingip"]["project_id"]
+    return response.json()["floatingip"]["project_id"]
 
 
 def get_router_project(connection: Connection, router_id: str):
-    neutron_endpoint = os_util.get_endpoint(
-        connection=connection, service_type="network", interface="internal"
+    # neutron_endpoint = os_util.get_endpoint(
+    #     connection=connection, service_type="network", interface="internal"
+    # )
+
+    neutron_endpoints = os_util.get_endpoints(
+        connection=connection, service_type="network", interface="public"
     )
 
-    try:
-        url = f"{neutron_endpoint}/v2.0/routers/{router_id}?fields=project_id"
+    response = None
 
-        response = connection.session.get(url)
+    for endpoint in neutron_endpoints:
+        try:
+            url = f"{endpoint}/v2.0/routers/{router_id}?fields=project_id"
 
-    except Exception as e:
-        print(e)
+            response = connection.session.get(url)
+
+            if response.status_code == 200:
+                break
+        except Exception as e:
+            print(e)
+
+    if response is None:
+        return None
 
     data = response.json()
 
