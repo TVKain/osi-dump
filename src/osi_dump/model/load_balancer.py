@@ -17,3 +17,6 @@ class LoadBalancer(BaseModel):
     amphoraes: list[dict]
 
     project_id: Optional[str]
+
+    created_at: Optional[str]
+    updated_at: Optional[str]
