@@ -44,10 +44,13 @@ class OpenStackLoadBalancerImporter(LoadBalancerImporter):
         load_balancers: list[LoadBalancer] = []
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = [
-                executor.submit(self._get_load_balancer_info, load_balancer)
-                for load_balancer in osload_balancers
-            ]
+            futures = [] 
+            
+            for load_balancer in osload_balancers:
+                logger.info("Importing load_balancer: %s", load_balancer["id"])
+                if load_balancer["id"] != None:
+                    futures.append(executor.submit(self._get_load_balancer_info, load_balancer))
+            
             for future in concurrent.futures.as_completed(futures):
                 load_balancers.append(future.result())
 
@@ -56,7 +59,6 @@ class OpenStackLoadBalancerImporter(LoadBalancerImporter):
         return load_balancers
 
     def _get_load_balancer_info(self, load_balancer: OSLoadBalancer) -> LoadBalancer:
-
         amphoraes = octavia_api.get_amphoraes(
             connection=self.connection, load_balancer_id=load_balancer["id"]
         )

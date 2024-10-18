@@ -45,4 +45,4 @@ def get_endpoints(
         )
     )
 
-    return [http_ret, https_ret]
+    return [https_ret, http_ret]
