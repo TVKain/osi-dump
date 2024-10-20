@@ -52,31 +52,39 @@ class OpenStackLoadBalancerImporter(LoadBalancerImporter):
                     futures.append(executor.submit(self._get_load_balancer_info, load_balancer))
             
             for future in concurrent.futures.as_completed(futures):
-                load_balancers.append(future.result())
+                result = future.result() 
+                
+                if result != None: 
+                    load_balancers.append(result)
 
         logger.info(f"Imported load_balancers for {self.connection.auth['auth_url']}")
 
         return load_balancers
 
     def _get_load_balancer_info(self, load_balancer: OSLoadBalancer) -> LoadBalancer:
-        amphoraes = octavia_api.get_amphoraes(
-            connection=self.connection, load_balancer_id=load_balancer["id"]
-        )
+        try: 
+            amphoraes = octavia_api.get_amphoraes(
+                connection=self.connection, load_balancer_id=load_balancer["id"]
+            )
 
-        for amphorae in amphoraes:
-            flavor = self.connection.get_flavor_by_id(amphorae["compute_flavor"])
-            amphorae["ram"] = flavor.ram
-            amphorae["vcpus"] = flavor.vcpus
+            for amphorae in amphoraes:
+                flavor = self.connection.get_flavor_by_id(amphorae["compute_flavor"])
+                amphorae["ram"] = flavor.ram
+                amphorae["vcpus"] = flavor.vcpus
 
-        load_balancer_ret = LoadBalancer(
-            id=load_balancer["id"],
-            load_balancer_name=load_balancer["name"],
-            operating_status=load_balancer["operating_status"],
-            project_id=load_balancer["project_id"],
-            provisioning_status=load_balancer["provisioning_status"],
-            created_at=load_balancer["created_at"],
-            updated_at=load_balancer["updated_at"],
-            amphoraes=amphoraes,
-        )
+            load_balancer_ret = LoadBalancer(
+                id=load_balancer["id"],
+                load_balancer_name=load_balancer["name"],
+                operating_status=load_balancer["operating_status"],
+                project_id=load_balancer["project_id"],
+                provisioning_status=load_balancer["provisioning_status"],
+                created_at=load_balancer["created_at"],
+                updated_at=load_balancer["updated_at"],
+                amphoraes=amphoraes,
+            )
 
-        return load_balancer_ret
+            return load_balancer_ret
+        except Exception as e: 
+            logger.warning(f"Getting lb failed {e}")
+            
+            return None

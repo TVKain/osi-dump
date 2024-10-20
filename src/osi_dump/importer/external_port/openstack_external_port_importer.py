@@ -11,6 +11,7 @@ from openstack.network.v2.port import Port as OSPort
 from openstack.network.v2.subnet import Subnet as OSSubnet
 from openstack.network.v2.floating_ip import FloatingIP as OSFloatingIP
 from openstack.network.v2.router import Router as OSRouter
+from openstack.network.v2.network import Network as OSNetwork
 
 from osi_dump.importer.external_port.external_port_importer import ExternalPortImporter
 from osi_dump.model.external_port import ExternalPort
@@ -122,11 +123,24 @@ class OpenStackExternalPortImporter(ExternalPortImporter):
                 device_id=external_port.device_id,
             )
         )
+        
+        network: OSNetwork = self.connection.get_network(name_or_id=external_port.network_id)
 
+        vlan_id = None
+        
+        try: 
+            if not network.segments: 
+                vlan_id = network.provider_segmentation_id
+            else: 
+                logger.warning(f"Multiple segments mapped for net id {network.id}")
+        except Exception as e: 
+            logger.warning(f"Can not get vlan ID for external port {external_port.id}, net id {network.id}")
+        
         external_port_ret = ExternalPort(
             port_id=external_port.id,
             project_id=project_id,
             network_id=external_port.network_id,
+            network_name=network.name,
             subnet_id=subnet_id,
             subnet_cidr=subnet_cidr,
             ip_address=ip_address,
@@ -134,6 +148,7 @@ class OpenStackExternalPortImporter(ExternalPortImporter):
             device_id=external_port.device_id,
             device_owner=external_port.device_owner,
             status=external_port.status,
+            vlan_id=vlan_id
         )
 
         return external_port_ret

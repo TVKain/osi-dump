@@ -108,7 +108,10 @@ class OpenStackInstanceImporter(InstanceImporter):
 
         except Exception as e:
             pass
-
+        
+        image_id = server.image["id"]
+        flavor_id = server.flavor["id"]
+        
         instance = Instance(
             instance_id=server.id,
             instance_name=server.name,
@@ -126,6 +129,8 @@ class OpenStackInstanceImporter(InstanceImporter):
             user_id=server.user_id,
             vgpus=vgpus,
             vgpu_type=vgpu_type,
+            image_id=image_id, 
+            flavor_id=flavor_id
         )
 
         return instance

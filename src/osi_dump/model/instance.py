@@ -21,6 +21,9 @@ class Instance(BaseModel):
     hypervisor: Optional[str]
 
     user_id: Optional[str]
+    
+    image_id: Optional[str]
+    flavor_id: Optional[str]
 
     created_at: str
     updated_at: str

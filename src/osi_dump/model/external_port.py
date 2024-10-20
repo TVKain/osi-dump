@@ -16,6 +16,7 @@ class ExternalPort(BaseModel):
 
     ip_address: Optional[str]
 
+    network_name: Optional[str]
     network_id: Optional[str]
 
     allowed_address_pairs: Optional[list[dict]]
@@ -25,3 +26,5 @@ class ExternalPort(BaseModel):
     device_owner: Optional[str]
 
     status: Optional[str]
+    
+    vlan_id: Optional[int]
