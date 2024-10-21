@@ -20,3 +20,11 @@
 ## 0.1.3.3
 
 - Hot fix extennal port model vlan id string -> int
+
+## 0.1.3.3.1
+
+- Optimize role assignment fetch 
+
+
+## 0.1.3.3.2 
+- Hot fix role assignment fetch, added `v3` into endpoint

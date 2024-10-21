@@ -10,6 +10,8 @@ from osi_dump.importer.role_assignment.role_assignment_importer import (
 )
 from osi_dump.model.role_assignment import RoleAssignment
 
+from osi_dump.api.keystone import get_role_assignments
+
 logger = logging.getLogger(__name__)
 
 
@@ -32,16 +34,16 @@ class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
         )
 
         try:
-            osrole_assignments: list[OSRoleAssignment] = list(
-                self.connection.identity.role_assignments()
-            )
+            osrole_assignments = get_role_assignments(self.connection)
+
+           
         except Exception as e:
             raise Exception(
                 f"Can not fetch role_assignments for {self.connection.auth['auth_url']}"
             ) from e
 
         role_assignments: list[RoleAssignment] = []
-
+        
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = [
                 executor.submit(self._get_role_assignment_info, role_assignment)
@@ -62,30 +64,26 @@ class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
         role_id = None
 
         try:
-            user_id = role_assignment.user["id"]
+            user_id = role_assignment["user"]["id"]
         except Exception as e:
             logger.warning(f"Can not get user id: {e}")
 
         try:
-            role_id = role_assignment.role["id"]
+            role_id = role_assignment["role"]["id"]
         except Exception as e:
             logger.warning(f"Can not get role id: {e}")
 
         user_name = None
         role_name = None
 
-        try:
-            role_name = self.connection.identity.get_role(
-                role_assignment.role["id"]
-            ).name
+        try:    
+            role_name = role_assignment['role']['name']
 
         except Exception as e:
             logger.warning(f"Can not get role name: {e}")
 
         try:
-            user_name = self.connection.identity.get_user(
-                role_assignment.user["id"]
-            ).name
+            user_name = role_assignment['user']['name']
         except Exception as e:
             logger.warning(f"Can not get user name: {e}")
 
@@ -94,7 +92,7 @@ class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
             user_name=user_name,
             role_id=role_id,
             role_name=role_name,
-            scope=role_assignment.scope,
+            scope=role_assignment['scope'],
         )
 
         return role_assignment_ret
