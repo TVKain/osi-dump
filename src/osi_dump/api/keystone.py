@@ -10,21 +10,39 @@ logger = logging.getLogger(__name__)
 
 
 def get_role_assignments(connection: Connection): 
-    keystone_endpoints = os_util.get_endpoints(
-        connection=connection, service_type="identity", interface="public"
-    )
+    keystone_endpoint = connection.endpoint_for(service_type="identity", interface="public")
     
-    for endpoint in keystone_endpoints: 
-        try: 
-            url = f"{endpoint}/v3/role_assignments?include_names"
-            response = connection.session.get(url)
-            if response.status_code == 200: 
-                break
-        except Exception as e: 
-            logger.info(e) 
+    logger.info(keystone_endpoint)
     
+    try:
+        if "v3" not in keystone_endpoint: 
+            url = f"{keystone_endpoint}/v3/role_assignments?include_names"
+        else: 
+            url = f"{keystone_endpoint}/role_assignments?include_names"
+            
+        logger.info(url)
+        response = connection.session.get(url)
+    except Exception as e: 
+        logger.info(e)
+        
     if response is None: 
         return []
     
-    return response.json()['role_assignments']
+    return response.json()['role_assignments']    
+    
+    # keystone_endpoints = [connection.endpoint_for(service_type="keystone", interface="public")]
+    
+    # for endpoint in keystone_endpoints: 
+    #     try: 
+    #         url = f"{endpoint}/v3/role_assignments?include_names"
+    #         response = connection.session.get(url)
+    #         if response.status_code == 200: 
+    #             break
+    #     except Exception as e: 
+    #         logger.info(e) 
+    
+    # if response is None: 
+    #     return []
+    
+    # return response.json()['role_assignments']
     

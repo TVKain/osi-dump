@@ -28,3 +28,9 @@
 
 ## 0.1.3.3.2 
 - Hot fix role assignment fetch, added `v3` into endpoint
+
+## 0.1.3.3.2.4
+- Revert role assignment optimization for backward compatibility 
+
+## 0.1.3.3.2.5
+- Revert openstacksdk version back to 3.3.0

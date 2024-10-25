@@ -34,12 +34,12 @@ class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
         )
 
         try:
-            osrole_assignments = get_role_assignments(self.connection)
-
-           
+            osrole_assignments: list[OSRoleAssignment] = list(
+                self.connection.identity.role_assignments()
+            )
         except Exception as e:
             raise Exception(
-                f"Can not fetch role_assignments for {self.connection.auth['auth_url']}"
+                f"Can not fetch role_assignments for {self.connection.auth['auth_url']} {e}"
             ) from e
 
         role_assignments: list[RoleAssignment] = []
@@ -77,13 +77,17 @@ class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
         role_name = None
 
         try:    
-            role_name = role_assignment['role']['name']
+            role_name = self.connection.identity.get_role(
+                role_assignment.role["id"]
+            ).name
 
         except Exception as e:
             logger.warning(f"Can not get role name: {e}")
 
         try:
-            user_name = role_assignment['user']['name']
+            user_name = self.connection.identity.get_user(
+                role_assignment.user["id"]
+            ).name
         except Exception as e:
             logger.warning(f"Can not get user name: {e}")
 
