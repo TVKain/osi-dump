@@ -15,9 +15,28 @@ from osi_dump.api.keystone import get_role_assignments
 logger = logging.getLogger(__name__)
 
 
-class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
+class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):    
     def __init__(self, connection: Connection):
         self.connection = connection
+        
+        self.users = {}
+        self.roles = {}
+        
+    def _get_users(self): 
+        os_users = self.connection.identity.users()
+        
+        for os_user in os_users: 
+            print(os_user)
+            self.users[os_user.id] = os_user.name 
+    
+    def _get_roles(self): 
+        os_roles = self.connection.identity.roles()
+        
+        for os_role in os_roles: 
+            
+            print(os_role)
+            self.roles[os_role.id] = os_role.name 
+        
 
     def import_role_assignments(self) -> list[RoleAssignment]:
         """Import role_assignments information from Openstack
@@ -32,11 +51,22 @@ class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
         logger.info(
             f"Importing role_assignments for {self.connection.auth['auth_url']}"
         )
+        
+        try: 
+            self._get_users()
+        except Exception as e: 
+            logger.info(f"Getting user list failed {e}")
+            
+        try: 
+            self._get_roles() 
+        except Exception as e: 
+            logger.info(f"Getting role list failed {e}")
 
         try:
             osrole_assignments: list[OSRoleAssignment] = list(
                 self.connection.identity.role_assignments()
             )
+
         except Exception as e:
             raise Exception(
                 f"Can not fetch role_assignments for {self.connection.auth['auth_url']} {e}"
@@ -53,7 +83,7 @@ class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
                 role_assignments.append(future.result())
 
         logger.info(f"Imported role_assignments for {self.connection.auth['auth_url']}")
-
+        
         return role_assignments
 
     def _get_role_assignment_info(
@@ -76,20 +106,15 @@ class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
         user_name = None
         role_name = None
 
-        try:    
-            role_name = self.connection.identity.get_role(
-                role_assignment.role["id"]
-            ).name
-
-        except Exception as e:
-            logger.warning(f"Can not get role name: {e}")
-
         try:
-            user_name = self.connection.identity.get_user(
-                role_assignment.user["id"]
-            ).name
+            user_name = self.users[user_id]
         except Exception as e:
             logger.warning(f"Can not get user name: {e}")
+
+        try:
+            role_name = self.roles[role_id]
+        except Exception as e:
+            logger.warning(f"Can not get role name: {e}")
 
         role_assignment_ret = RoleAssignment(
             user_id=user_id,
