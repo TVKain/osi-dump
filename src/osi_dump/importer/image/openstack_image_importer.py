@@ -50,12 +50,15 @@ class OpenStackImageImporter(ImageImporter):
 
     def _get_image_info(self, os_image: OSImage) -> Image:
 
-        properties: dict = os_image.properties
+        try:
+            properties: dict = os_image.properties
 
-        properties.pop("owner_specified.openstack.md5", None)
-        properties.pop("owner_specified.openstack.sha256", None)
-        properties.pop("owner_specified.openstack.object", None)
-        properties.pop("stores", None)
+            properties.pop("owner_specified.openstack.md5", None)
+            properties.pop("owner_specified.openstack.sha256", None)
+            properties.pop("owner_specified.openstack.object", None)
+            properties.pop("stores", None)
+        except Exception as e: 
+            logger.warn(f"properties for {os_image.id} is None")
 
         image = Image(
             image_id=os_image.id,

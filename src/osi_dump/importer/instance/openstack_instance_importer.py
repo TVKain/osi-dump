@@ -35,7 +35,7 @@ class OpenStackInstanceImporter(InstanceImporter):
             )
         except Exception as e:
             raise Exception(
-                f"Can not fetch instances for {self.connection.auth['auth_url']}"
+                f"Can not fetch instances for {self.connection.auth['auth_url']}: {e}"
             ) from e
 
         instances: list[Instance] = []
