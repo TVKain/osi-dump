@@ -33,6 +33,7 @@ def get_connections(file_path) -> list[Connection]:
                 password=auth.password,
                 project_domain_name=auth.project_domain_name,
                 user_domain_name=auth.user_domain_name,
+                interface=auth.interface,
             )
 
             connections.append(connection)

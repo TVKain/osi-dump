@@ -1,11 +1,11 @@
 [
-    {
-        "auth_url": "http://10.0.1.11:5000/v3",
-        "project_name": "admin",
-        "username": "admin",
-        "password": "1",
-        "user_domain_name": "default",
-        "project_domain_name" :"default"
-    }
+  {
+    "auth_url": "http://10.11.1.13:5000",
+    "project_name": "admin",
+    "username": "admin",
+    "password": "0U7PRW6JQpVz6VaeZa6Vg7cKDQT4byKwNtiSXFyT",
+    "user_domain_name": "default",
+    "project_domain_name": "default",
+    "interface": "internal"
+  }
 ]
-

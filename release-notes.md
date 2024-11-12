@@ -57,6 +57,10 @@
 
 - Removed `validate=False`
 
+## 0.1.3.3.3.2
+
+- Added `interface` to auth information (default to `'public'`)
+
 ## 0.1.3.3.3.3
 
 - Add vip for lb, role for amphorae
