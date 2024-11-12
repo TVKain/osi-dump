@@ -15,28 +15,24 @@ from osi_dump.api.keystone import get_role_assignments
 logger = logging.getLogger(__name__)
 
 
-class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):    
+class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
     def __init__(self, connection: Connection):
         self.connection = connection
-        
+
         self.users = {}
         self.roles = {}
-        
-    def _get_users(self): 
+
+    def _get_users(self):
         os_users = self.connection.identity.users()
-        
-        for os_user in os_users: 
-            print(os_user)
-            self.users[os_user.id] = os_user.name 
-    
-    def _get_roles(self): 
+
+        for os_user in os_users:
+            self.users[os_user.id] = os_user.name
+
+    def _get_roles(self):
         os_roles = self.connection.identity.roles()
-        
-        for os_role in os_roles: 
-            
-            print(os_role)
-            self.roles[os_role.id] = os_role.name 
-        
+
+        for os_role in os_roles:
+            self.roles[os_role.id] = os_role.name
 
     def import_role_assignments(self) -> list[RoleAssignment]:
         """Import role_assignments information from Openstack
@@ -51,15 +47,15 @@ class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
         logger.info(
             f"Importing role_assignments for {self.connection.auth['auth_url']}"
         )
-        
-        try: 
+
+        try:
             self._get_users()
-        except Exception as e: 
+        except Exception as e:
             logger.info(f"Getting user list failed {e}")
-            
-        try: 
-            self._get_roles() 
-        except Exception as e: 
+
+        try:
+            self._get_roles()
+        except Exception as e:
             logger.info(f"Getting role list failed {e}")
 
         try:
@@ -73,7 +69,7 @@ class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
             ) from e
 
         role_assignments: list[RoleAssignment] = []
-        
+
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = [
                 executor.submit(self._get_role_assignment_info, role_assignment)
@@ -83,7 +79,7 @@ class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
                 role_assignments.append(future.result())
 
         logger.info(f"Imported role_assignments for {self.connection.auth['auth_url']}")
-        
+
         return role_assignments
 
     def _get_role_assignment_info(
@@ -121,7 +117,7 @@ class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
             user_name=user_name,
             role_id=role_id,
             role_name=role_name,
-            scope=role_assignment['scope'],
+            scope=role_assignment["scope"],
         )
 
         return role_assignment_ret
