@@ -81,6 +81,7 @@ class OpenStackLoadBalancerImporter(LoadBalancerImporter):
                 created_at=load_balancer["created_at"],
                 updated_at=load_balancer["updated_at"],
                 amphoraes=amphoraes,
+                vip=load_balancer["vip_address"]
             )
 
             return load_balancer_ret

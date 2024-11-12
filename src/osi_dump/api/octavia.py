@@ -48,7 +48,7 @@ def get_amphoraes(connection: Connection, load_balancer_id: str) -> list[dict]:
 
     for endpoint in octavia_endpoints:
         try:
-            url = f"{endpoint}/v2/octavia/amphorae?load_balancer_id={load_balancer_id}&fields=status&fields=compute_id&fields=compute_flavor"
+            url = f"{endpoint}/v2/octavia/amphorae?load_balancer_id={load_balancer_id}&fields=status&fields=compute_id&fields=compute_flavor&fields=role"
             response = connection.session.get(url)
             if response.status_code == 200:
                 break

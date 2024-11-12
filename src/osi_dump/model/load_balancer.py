@@ -15,6 +15,7 @@ class LoadBalancer(BaseModel):
     operating_status: Optional[str]
 
     amphoraes: list[dict]
+    vip: Optional[str]
 
     project_id: Optional[str]
 

@@ -53,6 +53,10 @@
 
 - Added `validate=False` to connection
 
-## 0.1.3.3.3.0
+## 0.1.3.3.3.1
 
 - Removed `validate=False`
+
+## 0.1.3.3.3.3
+
+- Add vip for lb, role for amphorae
