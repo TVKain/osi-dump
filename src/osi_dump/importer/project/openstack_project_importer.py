@@ -49,18 +49,44 @@ class OpenStackProjectImporter(ProjectImporter):
         return projects
 
     def _get_project_info(self, project: OSProject) -> Project:
+        
+        usage_instance=None
+        quota_instance=None
+        usage_ram=None
+        quota_ram=None
+        usage_vcpu=None
+        quota_vcpu=None
 
         try:
             compute_quotas = self.connection.compute.get_quota_set(
                 project.id, usage=True
             )
+
+            usage_instance=compute_quotas.usage["instances"]
+            quota_instance=compute_quotas.instances
+            usage_ram=compute_quotas.usage["ram"]
+            quota_ram=compute_quotas.ram
+            usage_vcpu=compute_quotas.usage["cores"]
+            quota_vcpu=compute_quotas.cores
         except Exception as e:
             logger.warning(f"Get compute quotas failed for {project.id} error: {e}")
 
+        usage_volume=None
+        quota_volume=None
+        usage_snapshot=None
+        quota_snapshot=None
+        usage_storage=None
+        quota_storage=None
         try:
             storage_quotas = self.connection.block_storage.get_quota_set(
                 project.id, usage=True
             )
+            usage_volume=storage_quotas.usage["volumes"],
+            quota_volume=storage_quotas.volumes,
+            usage_snapshot=storage_quotas.usage["snapshots"],
+            quota_snapshot=storage_quotas.snapshots,
+            usage_storage=storage_quotas.usage["gigabytes"],
+            quota_storage=storage_quotas.gigabytes,
         except Exception as e:
             logger.warning(f"Get storage quotas failed for {project.id} error: {e}")
 
@@ -78,18 +104,18 @@ class OpenStackProjectImporter(ProjectImporter):
             domain_name=domain_name,
             enabled=project.is_enabled,
             parent_id=project.parent_id,
-            usage_instance=compute_quotas.usage["instances"],
-            quota_instance=compute_quotas.instances,
-            usage_ram=compute_quotas.usage["ram"],
-            quota_ram=compute_quotas.ram,
-            usage_vcpu=compute_quotas.usage["cores"],
-            quota_vcpu=compute_quotas.cores,
-            usage_volume=storage_quotas.usage["volumes"],
-            quota_volume=storage_quotas.volumes,
-            usage_snapshot=storage_quotas.usage["snapshots"],
-            quota_snapshot=storage_quotas.snapshots,
-            usage_storage=storage_quotas.usage["gigabytes"],
-            quota_storage=storage_quotas.gigabytes,
+            usage_instance=usage_instance, 
+            quota_instance=quota_instance,
+            usage_ram=usage_ram,
+            quota_ram=quota_ram, 
+            usage_vcpu=usage_vcpu,
+            quota_vcpu=quota_vcpu,
+            usage_volume=usage_volume,
+            quota_volume=quota_volume,
+            usage_snapshot=usage_snapshot,
+            quota_snapshot=quota_snapshot,
+            usage_storage=usage_storage,
+            quota_storage=quota_storage
         )
 
         return project_ret
