@@ -4,10 +4,11 @@ import concurrent
 
 from openstack.connection import Connection
 from openstack.identity.v3.project import Project as OSProject
+from openstack.load_balancer.v2.load_balancer import LoadBalancer as OSLoadBalancer
 
 from osi_dump.importer.project.project_importer import ProjectImporter
 from osi_dump.model.project import Project
-
+import osi_dump.api.octavia as octavia_api
 logger = logging.getLogger(__name__)
 
 
@@ -26,6 +27,22 @@ class OpenStackProjectImporter(ProjectImporter):
         """
 
         logger.info(f"Importing projects for {self.connection.auth['auth_url']}")
+        try:
+            osload_balancers: list[OSLoadBalancer] = octavia_api.get_load_balancers(
+                connection=self.connection
+            )
+        except Exception as e:
+            raise Exception(
+                f"Can not fetch load_balancers for {self.connection.auth['auth_url']} {e}"
+            ) from e
+
+        project_lb_dict = {}
+
+        for osload_balancer in osload_balancers: 
+            if project_lb_dict.get(osload_balancer["project_id"]):
+                project_lb_dict[osload_balancer["project_id"]] += 1 
+            else: 
+                project_lb_dict[osload_balancer["project_id"]] = 1
 
         try:
             osprojects: list[OSProject] = list(self.connection.identity.projects())
@@ -38,7 +55,7 @@ class OpenStackProjectImporter(ProjectImporter):
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = [
-                executor.submit(self._get_project_info, project)
+                executor.submit(self._get_project_info, project, project_lb_dict)
                 for project in osprojects
             ]
             for future in concurrent.futures.as_completed(futures):
@@ -48,7 +65,7 @@ class OpenStackProjectImporter(ProjectImporter):
 
         return projects
 
-    def _get_project_info(self, project: OSProject) -> Project:
+    def _get_project_info(self, project: OSProject, project_lb_dict: dict) -> Project:
         
         usage_instance=None
         quota_instance=None
@@ -81,12 +98,12 @@ class OpenStackProjectImporter(ProjectImporter):
             storage_quotas = self.connection.block_storage.get_quota_set(
                 project.id, usage=True
             )
-            usage_volume=storage_quotas.usage["volumes"],
-            quota_volume=storage_quotas.volumes,
-            usage_snapshot=storage_quotas.usage["snapshots"],
-            quota_snapshot=storage_quotas.snapshots,
-            usage_storage=storage_quotas.usage["gigabytes"],
-            quota_storage=storage_quotas.gigabytes,
+            usage_volume=storage_quotas.usage["volumes"]
+            quota_volume=storage_quotas.volumes
+            usage_snapshot=storage_quotas.usage["snapshots"]
+            quota_snapshot=storage_quotas.snapshots
+            usage_storage=storage_quotas.usage["gigabytes"]
+            quota_storage=storage_quotas.gigabytes
         except Exception as e:
             logger.warning(f"Get storage quotas failed for {project.id} error: {e}")
 
@@ -96,6 +113,8 @@ class OpenStackProjectImporter(ProjectImporter):
             domain_name = domain.name
         except Exception as e:
             logger.warning(f"Get domain failed for {project.domain_id} error: {e}")
+
+        lb_count = project_lb_dict.get(project.id)
 
         project_ret = Project(
             project_id=project.id,
@@ -115,7 +134,8 @@ class OpenStackProjectImporter(ProjectImporter):
             usage_snapshot=usage_snapshot,
             quota_snapshot=quota_snapshot,
             usage_storage=usage_storage,
-            quota_storage=quota_storage
+            quota_storage=quota_storage,
+            load_balancer_count=lb_count
         )
 
         return project_ret

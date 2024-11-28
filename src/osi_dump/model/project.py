@@ -30,3 +30,5 @@ class Project(BaseModel):
 
     usage_storage: Optional[int]
     quota_storage: Optional[int]
+
+    load_balancer_count: Optional[int]

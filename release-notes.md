@@ -64,3 +64,11 @@
 ## 0.1.3.3.3.3
 
 - Add vip for lb, role for amphorae
+
+## 0.1.3.3.3.5
+
+- Add lb count for project sheet
+
+## 0.1.3.3.3.6
+
+- Add amphorae flavor, description for lb sheet

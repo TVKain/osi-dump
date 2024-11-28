@@ -14,7 +14,10 @@ class LoadBalancer(BaseModel):
 
     operating_status: Optional[str]
 
-    amphoraes: list[dict]
+    flavor_name: Optional[str]
+    flavor_description: Optional[str]
+
+    amphoraes: list[dict] # compute_id, compute_flavor_id, flavor_name, flavor_description
     vip: Optional[str]
 
     project_id: Optional[str]

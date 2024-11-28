@@ -62,6 +62,21 @@ class OpenStackLoadBalancerImporter(LoadBalancerImporter):
         return load_balancers
 
     def _get_load_balancer_info(self, load_balancer: OSLoadBalancer) -> LoadBalancer:
+
+        lb_flavor_name = None 
+        lb_flavor_description = None 
+
+        try: 
+            lb_flavor = octavia_api.get_load_balancer_flavor(
+                connection=self.connection, 
+                flavor_id=load_balancer["flavor_id"]
+            )
+
+            lb_flavor_name = lb_flavor["name"]
+            lb_flavor_description = lb_flavor["description"]
+        except Exception as e: 
+            logger.warning(f"Get load balancer flavor failed {e}")
+
         try: 
             amphoraes = octavia_api.get_amphoraes(
                 connection=self.connection, load_balancer_id=load_balancer["id"]
@@ -71,6 +86,8 @@ class OpenStackLoadBalancerImporter(LoadBalancerImporter):
                 flavor = self.connection.get_flavor_by_id(amphorae["compute_flavor"])
                 amphorae["ram"] = flavor.ram
                 amphorae["vcpus"] = flavor.vcpus
+                amphorae["flavor_name"] = flavor.name 
+                amphorae["flavor_description"] = flavor.description
 
             load_balancer_ret = LoadBalancer(
                 id=load_balancer["id"],
@@ -81,7 +98,9 @@ class OpenStackLoadBalancerImporter(LoadBalancerImporter):
                 created_at=load_balancer["created_at"],
                 updated_at=load_balancer["updated_at"],
                 amphoraes=amphoraes,
-                vip=load_balancer["vip_address"]
+                vip=load_balancer["vip_address"],
+                flavor_name=lb_flavor_name, 
+                flavor_description=lb_flavor_description
             )
 
             return load_balancer_ret
