@@ -72,8 +72,11 @@ class OpenStackLoadBalancerImporter(LoadBalancerImporter):
                 flavor_id=load_balancer["flavor_id"]
             )
 
-            lb_flavor_name = lb_flavor["name"]
-            lb_flavor_description = lb_flavor["description"]
+            if lb_flavor:
+                lb_flavor_name = lb_flavor["name"]
+                lb_flavor_description = lb_flavor["description"]
+            else: 
+                raise Exception(f'No flavor id found for {load_balancer["id"]}')
         except Exception as e: 
             logger.warning(f"Get load balancer flavor failed {e}")
 

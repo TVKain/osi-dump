@@ -72,3 +72,11 @@
 ## 0.1.3.3.3.6
 
 - Add amphorae flavor, description for lb sheet
+
+## 0.1.3.3.3.8 
+
+- Add lb flavor
+
+## 0.1.3.3.3.9
+
+- Update LB Flavor error logging

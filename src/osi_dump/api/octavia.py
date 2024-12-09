@@ -7,6 +7,10 @@ import osi_dump.util.openstack_util as os_util
 
 
 def get_load_balancer_flavor(connection: Connection, flavor_id: str) -> dict: 
+
+    if not flavor_id: 
+        return None
+
     octavia_endpoints = os_util.get_endpoints(
         connection=connection, service_type="load-balancer", interface="public"
     )
