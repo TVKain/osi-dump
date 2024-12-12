@@ -19,6 +19,8 @@ app = typer.Typer()
 
 
 from osi_dump.batch_handler.flavor_batch_handler import FlavorBatchHandler
+from osi_dump.batch_handler.network_batch_handler import NetworkBatchHandler
+
 from osi_dump.batch_handler.image_batch_handler import ImageBatchHandler
 from osi_dump.batch_handler.volume_batch_handler import VolumeBatchHandler
 from osi_dump.os_connection.get_connections import get_connections
@@ -149,6 +151,14 @@ def _external_port(connections, output_path: str):
 
     _external_batch_handler.process()
 
+def _network(connections, output_path: str):
+    _network_batch_handler = NetworkBatchHandler()
+
+    _network_batch_handler.add_importer_exporter_from_openstack_connections(
+        connections, output_file=output_path
+    )
+
+    _network_batch_handler.process()
 
 def inner_main(file_path: str, output_path: str):
 
@@ -177,6 +187,8 @@ def inner_main(file_path: str, output_path: str):
     _router(connections=connections, output_path=output_path)
 
     _external_port(connections=connections, output_path=output_path)
+
+    _network(connections=connections, output_path=output_path)
 
     util.excel_autosize_column(output_path)
 

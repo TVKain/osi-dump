@@ -27,4 +27,4 @@ class ExcelFlavorExporter(FlavorExporter):
 
             logger.info(f"Exported flavors for {self.sheet_name}")
         except Exception as e:
-            logger.warning(f"Exporting floating ips for {self.sheet_name} error: {e}")
+            logger.warning(f"Exporting flavors for {self.sheet_name} error: {e}")

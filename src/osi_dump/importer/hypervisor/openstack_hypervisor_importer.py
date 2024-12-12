@@ -56,6 +56,23 @@ class OpenStackHypervisorImporter(HypervisorImporter):
 
         return hypervisors
 
+
+    def _normalize_hypervisor_aggregate(self, hypervisors: list[Hypervisor]):
+        
+        aggregate_id_map = {
+
+        }
+
+        aggregates: list[list[dict]] = [
+
+        ]
+
+        for hypervisor in hypervisors:
+            aggregates.append(hypervisor.aggregates)
+
+    def _swap_element(array, i, j): 
+        array[i], array[j] = array[j], array[i]
+
     def _get_hypervisor_info(
         self, hypervisor: OSHypervisor, aggregates: list[OSAggregate]
     ) -> Hypervisor:
