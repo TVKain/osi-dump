@@ -88,3 +88,6 @@
 ## 0.1.3.3.4.1
 
 - Add options and password_expires_at to role assignment sheet
+
+## 0.1.3.3.4.2
+- Re add missing sheets
