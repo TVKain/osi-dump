@@ -4,13 +4,15 @@ import concurrent
 
 from openstack.connection import Connection
 from openstack.identity.v3.role_assignment import RoleAssignment as OSRoleAssignment
+from openstack.identity.v3.user import User as OSUser
+
 
 from osi_dump.importer.role_assignment.role_assignment_importer import (
     RoleAssignmentImporter,
 )
 from osi_dump.model.role_assignment import RoleAssignment
 
-from osi_dump.api.keystone import get_role_assignments
+from osi_dump.api.keystone import get_role_assignments, get_users
 
 logger = logging.getLogger(__name__)
 
@@ -19,14 +21,14 @@ class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
     def __init__(self, connection: Connection):
         self.connection = connection
 
-        self.users = {}
+        self.users: dict[str, dict] = {}
         self.roles = {}
 
     def _get_users(self):
-        os_users = self.connection.identity.users()
+        os_users = get_users(self.connection)
 
         for os_user in os_users:
-            self.users[os_user.id] = os_user.name
+            self.users[os_user["id"]] = os_user
 
     def _get_roles(self):
         os_roles = self.connection.identity.roles()
@@ -90,7 +92,7 @@ class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
         role_id = None
 
         try:
-            user_id = role_assignment["user"]["id"]
+            user_id: str = role_assignment["user"]["id"]
         except Exception as e:
             logger.warning(f"Can not get user id: {e}")
 
@@ -102,8 +104,11 @@ class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
         user_name = None
         role_name = None
 
+        password_expires_at = None
+        options = None
+
         try:
-            user_name = self.users[user_id]
+            user_name = self.users[user_id]["name"]
         except Exception as e:
             logger.warning(f"Can not get user name: {e}")
 
@@ -112,12 +117,25 @@ class OpenStackRoleAssignmentImporter(RoleAssignmentImporter):
         except Exception as e:
             logger.warning(f"Can not get role name: {e}")
 
+        try:
+            password_expires_at = self.users[user_id]["password_expires_at"]
+        except Exception as e: 
+            logger.warning(f"Can not get password expires at: {e}")
+
+
+        try:
+            options = self.users[user_id]["options"]
+        except Exception as e:
+            logger.warning(f"Can not get option")
+
         role_assignment_ret = RoleAssignment(
             user_id=user_id,
             user_name=user_name,
             role_id=role_id,
             role_name=role_name,
             scope=role_assignment["scope"],
+            password_expires_at=password_expires_at,
+            options=options
         )
 
         return role_assignment_ret

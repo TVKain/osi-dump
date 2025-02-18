@@ -9,6 +9,29 @@ import osi_dump.util.openstack_util as os_util
 logger = logging.getLogger(__name__)
 
 
+def get_users(connection: Connection):
+
+    keystone_endpoints = os_util.get_endpoints(connection=connection, service_type="identity", interface="public")
+
+    for keystone_endpoint in keystone_endpoints:
+        try:
+            if "v3" not in keystone_endpoint: 
+                url = f"{keystone_endpoint}/v3/users"
+            else: 
+                url = f"{keystone_endpoint}/users"
+                
+            response = connection.session.get(url)
+            if response.status_code == 200:
+                break
+        except Exception as e: 
+            logger.info(e)
+
+
+    if response is None:
+        return []
+
+    return response.json()["users"]
+
 def get_role_assignments(connection: Connection): 
     keystone_endpoint = connection.endpoint_for(service_type="identity", interface="public")
     

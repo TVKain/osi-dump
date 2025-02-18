@@ -166,29 +166,29 @@ def inner_main(file_path: str, output_path: str):
 
     connections = get_connections(file_path=file_path)
 
-    _instance(connections=connections, output_path=output_path)
+    #_instance(connections=connections, output_path=output_path)
 
-    _floating_ip(connections=connections, output_path=output_path)
+    #_floating_ip(connections=connections, output_path=output_path)
 
-    _volume(connections=connections, output_path=output_path)
+    #_volume(connections=connections, output_path=output_path)
 
-    _hypervisor(connections=connections, output_path=output_path)
+    #_hypervisor(connections=connections, output_path=output_path)
 
-    _project(connections=connections, output_path=output_path)
+    #_project(connections=connections, output_path=output_path)
 
-    _image(connections=connections, output_path=output_path)
+    #_image(connections=connections, output_path=output_path)
 
-    _flavor(connections=connections, output_path=output_path)
+    #_flavor(connections=connections, output_path=output_path)
 
     _role_assignment(connections=connections, output_path=output_path)
 
-    _load_balancer(connections=connections, output_path=output_path)
+    #_load_balancer(connections=connections, output_path=output_path)
 
-    _router(connections=connections, output_path=output_path)
+    #_router(connections=connections, output_path=output_path)
 
-    _external_port(connections=connections, output_path=output_path)
+    #_external_port(connections=connections, output_path=output_path)
 
-    _network(connections=connections, output_path=output_path)
+    #_network(connections=connections, output_path=output_path)
 
     util.excel_autosize_column(output_path)
 

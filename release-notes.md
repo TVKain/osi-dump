@@ -84,3 +84,7 @@
 ## 0.1.3.3.4.0
 
 - Add Network sheet 
+
+## 0.1.3.3.4.1
+
+- Add options and password_expires_at to role assignment sheet

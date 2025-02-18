@@ -14,4 +14,8 @@ class RoleAssignment(BaseModel):
 
     role_name: Optional[str]
 
+    options: Optional[dict]
+
+    password_expires_at: Optional[str]
+
     scope: Optional[dict]
