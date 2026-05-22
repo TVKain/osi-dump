@@ -1,26 +1,35 @@
 import pandas as pd
 
-from pandas import DataFrame
+def expand_list_column(df: pd.DataFrame, column_name: str) -> pd.DataFrame:
+    """
+    Mở rộng một cột chứa danh sách các dictionary thành CÁC CỘT MỚI
+    trên CÙNG MỘT HÀNG (ví dụ: aggregates.0.id, aggregates.1.id).
+    Không nhân bản hàng.
+    """
+    
+    df = df.copy()
 
+    if column_name not in df.columns or df[column_name].isnull().all():
+        return df
+    
+    list_series = df[column_name].apply(lambda x: x if isinstance(x, list) else [])
+    
+    if list_series.apply(len).max() == 0:
+        return df.drop(column_name, axis=1, errors='ignore')
 
-def expand_list_column(df, column):
-    # Find the maximum length of the list in the column
-    max_len = df[column].apply(len).max()
+    max_len = int(list_series.apply(len).max())
 
-    # Expand each dictionary in the list into columns
     expanded_df = pd.DataFrame(
-        df[column]
-        .apply(lambda x: [{**item} for item in x] + [{}] * (max_len - len(x)))
-        .tolist(),
+        list_series.apply(lambda x: x + [{}] * (max_len - len(x))).tolist(),
         index=df.index,
     )
 
-    # Flatten the nested dictionaries into separate columns
     expanded_df = pd.json_normalize(expanded_df.to_dict(orient="records"))
 
-    expanded_df = expanded_df.add_prefix(column)
+    # Thêm tiền tố 'column_name.' vào tên các cột mới
+    expanded_df.columns = [f"{column_name}.{col}" for col in expanded_df.columns]
 
-    # Drop the original column and join the expanded columns
-    df = df.drop(column, axis=1).join(expanded_df)
+    # Xóa cột gốc (chứa list) và nối (join) các cột mới vào
+    df = df.drop(column_name, axis=1).join(expanded_df)
 
     return df

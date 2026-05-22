@@ -90,4 +90,66 @@
 - Add options and password_expires_at to role assignment sheet
 
 ## 0.1.3.3.4.2
+
 - Re add missing sheets
+
+## 0.1.4
+
+- Add Security groups sheet
+- Refactor role assignment using Python generator
+- Add Role effective sheet to view roles inherited from group roles
+- Refactor instance using Python generator
+
+## 0.1.5
+
+- Remove role inheritance logic
+- Fix instance importer
+
+## 0.1.6
+Changed:
+- Refactor data importers to use Python generators:
+  - volume, floating IP, image, flavor
+  - router, external port, network
+  - hypervisor, project
+
+## 0.1.7
+Changed:
+- Refactor data exporter:
+  - volume: Add collums of os-vol-host-attr:host, volume_image_metadata
+
+## 0.1.8
+Changed:
+- Refactor data exporter:
+  - instance: Instances sheet 'self.sheet_name' will be sorted by creation time.
+
+## 0.1.9
+Changed:
+- Refactor data exporter:
+  - hypervisor: Hypervisors sheet will be sorted by name prefix and numeric suffix.
+
+## 0.2.0
+Changed:
+- Hotfix data exporter:
+  - hypervisor: Fix sorting error in Agg collums.
+  - Fix: src/util/panda_excel
+
+## 0.2.1
+Changed:
+- Hotfix data exporter:
+  - hypervisor: Aggregates column's logic
+
+## 0.3.1
+Changed:
+- Add Trunk sheet
+
+## 0.3.1.1
+Hotfix:
+- Add User_ID in Volume Sheet
+
+## 0.3.1.2
+Hotfix:
+- Fix Instance importer exception
+
+## 0.4.0.0
+Changed:
+- Add Floating IP sheet

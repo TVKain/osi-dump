@@ -1,10 +1,7 @@
 import logging
-
-import concurrent
-
+from typing import Generator
 from openstack.connection import Connection
 from openstack.compute.v2.server import Server
-
 from openstack.compute.v2.flavor import Flavor as OSFlavor
 
 from osi_dump.importer.instance.instance_importer import InstanceImporter
@@ -17,73 +14,62 @@ class OpenStackInstanceImporter(InstanceImporter):
     def __init__(self, connection: Connection):
         self.connection = connection
 
-    def import_instances(self) -> list[Instance]:
-        """Import instances information from Openstack
-
-        Raises:
-            Exception: Raises exception if fetching server failed
-
-        Returns:
-            list[Instance]: _description_
-        """
+    def import_instances(self) -> Generator[Instance, None, None]:
+        """Import instances information from Openstack as a generator."""
 
         logger.info(f"Importing instances for {self.connection.auth['auth_url']}")
-
         try:
-            servers: list[Server] = list(
-                self.connection.compute.servers(details=True, all_projects=True)
-            )
+            server_iterator = self.connection.compute.servers(details=True, all_projects=True)
         except Exception as e:
-            raise Exception(
-                f"Can not fetch instances for {self.connection.auth['auth_url']}: {e}"
-            ) from e
+            logger.error(f"Critical Error: Cannot fetch instances list for {self.connection.auth['auth_url']}: {e}")
+            return 
 
-        instances: list[Instance] = []
-
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = [
-                executor.submit(self._get_instance_info, server) for server in servers
-            ]
-            for future in concurrent.futures.as_completed(futures):
-                instances.append(future.result())
-
-        logger.info(f"Imported instances for {self.connection.auth['auth_url']}")
-
-        return instances
+        for server in server_iterator:
+            try:
+                yield self._get_instance_info(server)
+            except Exception as e:
+                logger.error(f"Error processing instance ID {server.id} (Name: {server.name}): {e}")
+                continue
+        
+        logger.info(f"Finished importing instances for {self.connection.auth['auth_url']}")
 
     def _get_instance_info(self, server: Server) -> Instance:
-
         project_name = None
         project_id = None
+        project = None 
         try:
-            project = self.connection.identity.get_project(server.project_id)
-            project_name = project.name
-            project_id = project.id
+            if server.project_id:
+                project = self.connection.identity.get_project(server.project_id)
+                if project:
+                    project_name = project.name
+                    project_id = project.id
         except Exception as e:
-            logger.warn(
+            logger.warning(
                 f"Unable to obtain project name for instance: {server.name}: {e}"
             )
 
         domain_name = None
-        try:
-            domain = self.connection.identity.get_domain(project.domain_id)
-            domain_name = domain.name
-        except Exception as e:
-            logger.warning(
-                f"Unable to obtain domain name for instance {server.name}: {e}"
-            )
+        if project and hasattr(project, 'domain_id') and project.domain_id: 
+            try:
+                domain = self.connection.identity.get_domain(project.domain_id)
+                if domain:
+                    domain_name = domain.name
+            except Exception as e:
+                logger.warning(
+                    f"Unable to obtain domain name for instance {server.name}: {e}"
+                )
 
-        # Lấy thông tin IPv4 private
         private_v4_ips = []
         floating_ip = None
 
         try:
-            for ips in server.addresses.values():
-                for ip in ips:
-                    if ip["OS-EXT-IPS:type"] == "fixed":
-                        private_v4_ips.append(ip["addr"])
-                    elif ip["OS-EXT-IPS:type"] == "floating":
-                        floating_ip = ip["addr"]
+            if server.addresses:
+                for ips in server.addresses.values():
+                    for ip in ips:
+                        if ip.get("OS-EXT-IPS:type") == "fixed":
+                            private_v4_ips.append(ip["addr"])
+                        elif ip.get("OS-EXT-IPS:type") == "floating":
+                            floating_ip = ip["addr"]
         except Exception as e:
             logger.warning(
                 f"Unable to obtain IP address information for instance {server.name}: {e}"
@@ -91,28 +77,34 @@ class OpenStackInstanceImporter(InstanceImporter):
 
         vgpus = None
         vgpu_type = None
-
         vgpu_metadata_property = "pci_passthrough:alias"
 
         try:
-            flavor: OSFlavor = self.connection.get_flavor(
-                name_or_id=server.flavor["id"]
-            )
-
-            vgpu_prop: str = flavor.extra_specs[vgpu_metadata_property]
-
-            vgpu_props = vgpu_prop.split(":")
-
-            vgpu_type = vgpu_props[0]
-            vgpus = int(vgpu_props[1])
-
-        except Exception as e:
+            if server.flavor and "id" in server.flavor:
+                flavor: OSFlavor = self.connection.get_flavor(
+                    name_or_id=server.flavor["id"]
+                )
+                if flavor and flavor.extra_specs:
+                    vgpu_prop: str = flavor.extra_specs.get(vgpu_metadata_property)
+                    if vgpu_prop:
+                        vgpu_props = vgpu_prop.split(":")
+                        vgpu_type = vgpu_props[0]
+                        vgpus = int(vgpu_props[1])
+        except Exception:
             pass
         
-        image_id = server.image["id"]
-        flavor_id = server.flavor["id"]
+        image_id = server.image.get("id") if server.image else None
         
-        instance = Instance(
+        flavor_id = None
+        flavor_ram = 0
+        flavor_vcpus = 0
+
+        if server.flavor:
+            flavor_id = server.flavor.get("id")
+            flavor_ram = server.flavor.get("ram", 0)
+            flavor_vcpus = server.flavor.get("vcpus", 0)
+        
+        return Instance(
             instance_id=server.id,
             instance_name=server.name,
             project_id=project_id,
@@ -122,8 +114,8 @@ class OpenStackInstanceImporter(InstanceImporter):
             floating_ip=floating_ip,
             status=server.status,
             hypervisor=server.hypervisor_hostname,
-            ram=server.flavor["ram"],
-            vcpus=server.flavor["vcpus"],
+            ram=flavor_ram,
+            vcpus=flavor_vcpus,
             created_at=server.created_at,
             updated_at=server.updated_at,
             user_id=server.user_id,
@@ -132,5 +124,3 @@ class OpenStackInstanceImporter(InstanceImporter):
             image_id=image_id, 
             flavor_id=flavor_id
         )
-
-        return instance
