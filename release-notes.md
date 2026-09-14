@@ -153,3 +153,9 @@ Hotfix:
 ## 0.4.0.0
 Changed:
 - Add Floating IP sheet
+
+## 0.4.0.1
+Hotfix & Optimization:
+- Fix N+1 queries performance bottleneck in Instance and Volume importers by pre-caching projects, domains, flavors, and snapshots (reducing dump time from hours to seconds).
+- Fix crash/hang caused by JSON parsing errors and proxy timeouts on large payloads.
+- Improve safety and string sanitization when extracting instance attributes.
